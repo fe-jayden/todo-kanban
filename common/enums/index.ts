@@ -19,3 +19,9 @@ export enum ESortOrder {
   Medium = 2,
   High = 3,
 }
+
+export enum EPriorityFormatColor {
+  Low = "#2D41A7",
+  Medium = "#ECB800",
+  High = "#E42C5F",
+}

@@ -1,5 +1,5 @@
 import { commonAdjustFlex, commonFontStyles } from "@/common/styles/style";
-import { styled } from "@mui/material/styles";
+import { styled } from "@mui/material";
 
 export const ColumnContainer = styled("div")(({ theme }) => ({
   display: "flex",
@@ -47,8 +47,25 @@ export const ClientName = styled("p")({
   color: "#2B1887",
 });
 
+export const LevelEffort = styled("div")(({ theme }) => ({
+  ...commonAdjustFlex("start", "center"),
+  gap: theme.spacing(1),
+}));
+
 export const TaskDetail = styled("div")(({ theme }) => ({
   ...commonAdjustFlex("space-between", "center"),
   marginTop: theme.spacing(1.75),
   gap: theme.spacing(1),
 }));
+
+export const DueDate = styled("div")`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 35px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: ${(props) => props.color};
+`;
