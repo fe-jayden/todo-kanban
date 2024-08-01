@@ -6,7 +6,7 @@ import LevelEffort from "../LevelEffort";
 interface ITask {
   name: string;
   id: string;
-  dueDate?: EDueDate;
+  dueDate?: EDueDate | null;
   Priority: EPriority;
   clientName: string;
 }
@@ -42,7 +42,10 @@ const ColumnTask: React.FC<IColumnTaskProps> = ({
                         {task.dueDate}
                       </S.DueDate>
                     )}
-                    <LevelEffort color={EPriorityFormatColor[task.Priority]} />
+                    <LevelEffort
+                      readOnly
+                      color={EPriorityFormatColor[task.Priority]}
+                    />
                   </S.LevelEffort>
 
                   <S.ClientName>{task.clientName}</S.ClientName>
