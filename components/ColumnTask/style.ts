@@ -22,6 +22,12 @@ export const HeaderName = styled("p")(({ theme }) => ({
   color: "#2B1887",
   gap: theme.spacing(1),
 }));
+export const BtnCreateTask = styled("button")(() => ({
+  fontSize: "16px",
+  lineHeight: "16px",
+  fontWeight: 600,
+  color: "#2B1887",
+}));
 
 export const ListTasksColumn = styled("div")(({ theme }) => ({
   ...commonAdjustFlex("center", "center"),
