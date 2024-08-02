@@ -1,14 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import * as S from "./styles";
 import { TodoIcon } from "../icons/todo";
 import { EDueDate, EPriority } from "@/common/enums";
 import { DoneIcon } from "../icons/done";
 import dynamic from "next/dynamic";
-import { Modal, Typography } from "@mui/material";
 import FormCreateTask from "../FormCreateTask";
+
 const ColumnTask = dynamic(() => import("../ColumnTask"), { ssr: false });
+
 const dummyTask = [
   {
     id: "1",
@@ -117,6 +118,26 @@ const DragDropContextComponent = () => {
     }
     return;
   };
+  const testCallApi = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/sheet", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "sd",
+          email: "qưe",
+          phone: "234234",
+          company: "234234",
+          type: "2434234",
+        }),
+      });
+      console.log(res);
+    } catch (error) {}
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <S.HeadingContainer>To-Do List Kanban</S.HeadingContainer>
@@ -140,7 +161,7 @@ const DragDropContextComponent = () => {
       >
         <FormCreateTask
           cancel={() => setIsCreateTask(false)}
-          onSubmitForm={(values) => console.log(values)}
+          onSubmitForm={(values) => testCallApi()}
         />
       </S.CusTomModal>
     </DragDropContext>
