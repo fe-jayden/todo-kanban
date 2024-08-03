@@ -7,6 +7,7 @@ import { EDueDate, EPriority } from "@/common/enums";
 import { DoneIcon } from "../icons/done";
 import dynamic from "next/dynamic";
 import FormCreateTask from "../FormCreateTask";
+import { IRequestTask } from "./interface";
 
 const ColumnTask = dynamic(() => import("../ColumnTask"), { ssr: false });
 
@@ -47,7 +48,7 @@ const initData = [
     id: "column-todo",
     createTask: true,
     icon: <TodoIcon />,
-    taskIds: [...dummyTask],
+    taskIds: [],
   },
   {
     name: "Done",
@@ -118,27 +119,48 @@ const DragDropContextComponent = () => {
     }
     return null;
   };
-  const testCallApi = async () => {
-    const rawDate = {};
+  const testCallApi = async (data: IRequestTask) => {
     try {
-      const res = await fetch("http://localhost:3000/api/sheet", {
+      await fetch("http://localhost:3000/api/sheet", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: "sd",
-          email: "qưe",
-          phone: "234234",
-          company: "234234",
-          type: "2434234",
-        }),
+        body: JSON.stringify(data),
       });
-      console.log(res);
+      testCallGetApi();
+      setIsCreateTask(false);
+    } catch (error) {}
+  };
+  const testCallGetApi = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/sheet", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+      const newData = data.data
+        ? data.data.map((item: any) => ({
+            ...item,
+            createTask:
+              item.column === "column-todo" || item.taskIds.length > 0
+                ? true
+                : false,
+            icon: item.column === "column-todo" ? <TodoIcon /> : <DoneIcon />,
+          }))
+        : initData;
+      setDataColumn(newData);
     } catch (error) {}
   };
 
+  useEffect(() => {
+    testCallGetApi();
+  }, []);
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <S.HeadingContainer>To-Do List KanBan</S.HeadingContainer>
@@ -162,7 +184,17 @@ const DragDropContextComponent = () => {
       >
         <FormCreateTask
           cancel={() => setIsCreateTask(false)}
-          onSubmitForm={(values) => testCallApi()}
+          onSubmitForm={(values) => {
+            const rawData = {
+              name_task: values.name_task,
+              assignee: values.assignee,
+              has_due: values.has_due,
+              date_due: values.date_due,
+              priority: values.priority,
+              sortorder: values.sortorder,
+            };
+            testCallApi(rawData as unknown as IRequestTask);
+          }}
         />
       </S.CusTomModal>
     </DragDropContext>

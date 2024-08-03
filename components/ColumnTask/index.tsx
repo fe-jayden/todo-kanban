@@ -38,8 +38,8 @@ const ColumnTask: React.FC<IColumnTaskProps> = ({ column, createNewTask }) => {
               column.taskIds.map((task, index) => {
                 return (
                   <Draggable
-                    key={task.id}
-                    draggableId={`${task.id}`}
+                    key={task.idtask}
+                    draggableId={`${task.idtask}`}
                     index={index}
                   >
                     {(draggableProvided, draggableSnapshot) => {
@@ -49,23 +49,23 @@ const ColumnTask: React.FC<IColumnTaskProps> = ({ column, createNewTask }) => {
                           {...draggableProvided.draggableProps}
                           {...draggableProvided.dragHandleProps}
                         >
-                          <S.TaskName>{task.name}</S.TaskName>
+                          <S.TaskName>{task.name_task}</S.TaskName>
                           <S.TaskDetail>
                             <S.LevelEffort>
-                              {task.dueDate && (
+                              {task.date_due && (
                                 <S.DueDate
-                                  color={EPriorityFormatColor[task.Priority]}
+                                  color={EPriorityFormatColor[task.priority]}
                                 >
-                                  {task.dueDate}
+                                  {task.date_due}
                                 </S.DueDate>
                               )}
                               <LevelEffort
                                 readOnly
-                                color={EPriorityFormatColor[task.Priority]}
+                                color={EPriorityFormatColor[task.priority]}
                               />
                             </S.LevelEffort>
 
-                            <S.ClientName>{task.clientName}</S.ClientName>
+                            <S.ClientName>{task.assignee}</S.ClientName>
                           </S.TaskDetail>
                         </S.Tasks>
                       );

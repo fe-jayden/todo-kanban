@@ -10,8 +10,9 @@ import React, { useState } from "react";
 import * as S from "./styles";
 import { EDueDate, EPriority, EPriorityFormatColor } from "@/common/enums";
 import LevelEffort from "../LevelEffort";
+import { IRequestTask } from "../DragDropContext/interface";
 interface IFormCreateTask {
-  onSubmitForm?: (values: FormDataEntryValue) => void;
+  onSubmitForm?: (values: IRequestTask) => void;
   cancel?: () => void;
 }
 const FormCreateTask: React.FC<IFormCreateTask> = ({
@@ -24,12 +25,12 @@ const FormCreateTask: React.FC<IFormCreateTask> = ({
     event.preventDefault();
     const formData = new FormData(event.target);
     const formObject = Object.fromEntries(formData.entries());
-    formObject.dueDate = valueSwitch as unknown as FormDataEntryValue;
-    formObject.date = (valueSwitch
-      ? formObject.date
+    formObject.has_due = valueSwitch as unknown as FormDataEntryValue;
+    formObject.date_due = (valueSwitch
+      ? formObject.date_due
       : null) as unknown as FormDataEntryValue;
 
-    onSubmitForm && onSubmitForm(formObject as unknown as FormDataEntryValue);
+    onSubmitForm && onSubmitForm(formObject as unknown as IRequestTask);
   };
 
   return (
@@ -38,7 +39,7 @@ const FormCreateTask: React.FC<IFormCreateTask> = ({
         <S.SGrid item xs={8}>
           <TextField
             label="Task Name"
-            name="taskName"
+            name="name_task"
             size="small"
             fullWidth
             margin="normal"
@@ -56,7 +57,7 @@ const FormCreateTask: React.FC<IFormCreateTask> = ({
         <S.SGrid item xs={4}>
           <FormControlLabel
             style={{ color: "black" }}
-            name="dueDate"
+            name="has_due"
             control={
               <Switch
                 onChange={(e) => setValueSwitch(e.target.checked)}
@@ -65,14 +66,14 @@ const FormCreateTask: React.FC<IFormCreateTask> = ({
                 checked={valueSwitch}
               />
             }
-            label="Due Date"
+            label="Has Due"
           />
         </S.SGrid>
         <S.SGrid item xs={2}>
           <Select
             displayEmpty
             size="small"
-            name="date"
+            name="date_due"
             disabled={!valueSwitch}
             defaultValue={EDueDate.Mon}
           >
@@ -103,7 +104,7 @@ const FormCreateTask: React.FC<IFormCreateTask> = ({
           <FormControlLabel
             control={
               <LevelEffort
-                name="sortOrder"
+                name="sortorder"
                 color={EPriorityFormatColor[valuePriority]}
               />
             }

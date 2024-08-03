@@ -6,7 +6,17 @@ export interface IDataColumn {
   id: string;
   createTask: boolean;
   icon: React.JSX.Element;
-  taskIds: ITask[];
+  taskIds: IRequestTask[];
+}
+export interface IRequestTask {
+  idtask?: string;
+  name_task: string;
+  assignee: string;
+  has_due: boolean;
+  date_due?: EDueDate | null;
+  priority: EPriority;
+  sortorder: string;
+  column?: string;
 }
 
 export interface ITask {
