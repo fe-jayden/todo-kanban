@@ -91,7 +91,7 @@ const DragDropContextComponent = () => {
   };
   const onDragEnd = (result: DropResult) => {
     const { destination, source } = result;
-    if (!destination) return;
+    if (!destination) return null;
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
@@ -108,7 +108,7 @@ const DragDropContextComponent = () => {
           )
         );
       }
-      return;
+      return null;
     }
     const newColumn: any = moveColumnList(result);
     if (newColumn && dataColumn) {
@@ -116,9 +116,10 @@ const DragDropContextComponent = () => {
         dataColumn.map((item) => (item.id === newColumn.id ? newColumn : item))
       );
     }
-    return;
+    return null;
   };
   const testCallApi = async () => {
+    const rawDate = {};
     try {
       const res = await fetch("http://localhost:3000/api/sheet", {
         method: "POST",
@@ -140,7 +141,7 @@ const DragDropContextComponent = () => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <S.HeadingContainer>To-Do List Kanban</S.HeadingContainer>
+      <S.HeadingContainer>To-Do List KanBan</S.HeadingContainer>
       <S.ColumnTask>
         {dataColumn.map((column) => {
           return (

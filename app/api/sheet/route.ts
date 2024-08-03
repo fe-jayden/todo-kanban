@@ -1,4 +1,5 @@
 import authClientJwt from "@/services/libs/jwt";
+import { v4 as uuidv4 } from "uuid";
 import { NextRequest, NextResponse } from "next/server";
 import { google, sheets_v4 } from "googleapis";
 
@@ -12,8 +13,10 @@ const sheets: sheets_v4.Sheets = google.sheets({
 
 export async function POST(req: NextRequest) {
   const { name, email, phone, company, type } = await req.json();
+  const taskId = uuidv4();
   try {
     const rawData = [
+      taskId,
       name,
       email,
       ...(phone ? [phone] : [null]),

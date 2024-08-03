@@ -19,13 +19,16 @@
     "next": "14.2.5",
     "react": "^18",
     "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "todo-kanban": "file:",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18",
+    "@types/uuid": "^10.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",

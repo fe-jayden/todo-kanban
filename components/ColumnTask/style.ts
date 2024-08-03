@@ -30,8 +30,9 @@ export const BtnCreateTask = styled("button")(() => ({
 }));
 
 export const ListTasksColumn = styled("div")(({ theme }) => ({
-  ...commonAdjustFlex("center", "center"),
+  ...commonAdjustFlex("start", "center"),
   flexDirection: "column",
+  height: "100%",
   padding: theme.spacing(1.25),
   rowGap: theme.spacing(1),
 }));
