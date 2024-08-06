@@ -3,45 +3,14 @@ import React, { useEffect, useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import * as S from "./styles";
 import { TodoIcon } from "../icons/todo";
-import { EDueDate, EPriority } from "@/common/enums";
 import { DoneIcon } from "../icons/done";
 import dynamic from "next/dynamic";
 import FormCreateTask from "../FormCreateTask";
 import { IRequestTask } from "./interface";
+import { SheetApi } from "@/services/sheet";
 
 const ColumnTask = dynamic(() => import("../ColumnTask"), { ssr: false });
 
-const dummyTask = [
-  {
-    id: "1",
-    name: "I am a task",
-    clientName: "JayDen",
-    dueDate: EDueDate.Fri,
-    Priority: EPriority.High,
-  },
-  {
-    id: "2",
-    name: "Add T&G a task",
-    clientName: "JayDen1",
-    dueDate: EDueDate.Thu,
-    Priority: EPriority.Low,
-  },
-  {
-    id: "3",
-    name: "Create sidebar navigation menu",
-    clientName: "JayDen2",
-    dueDate: EDueDate.Mon,
-    Priority: EPriority.Medium,
-  },
-
-  {
-    id: "4",
-    name: "Create  menu",
-    clientName: "JayDen2",
-    dueDate: null,
-    Priority: EPriority.Medium,
-  },
-];
 const initData = [
   {
     name: "To-Do",
@@ -90,6 +59,31 @@ const DragDropContextComponent = () => {
     taskColumnDestination.splice(destination?.index ?? 0, 0, moved);
     return { ...columnDestination, taskIds: taskColumnDestination };
   };
+  const handleCreateTask = async (data: IRequestTask) => {
+    try {
+      await SheetApi.createTask(data);
+      callGetListTask();
+      setIsCreateTask(false);
+    } catch (error) {}
+  };
+  const handleDragDropTask = async (result: DropResult) => {
+    try {
+      await SheetApi.dragDrop(result);
+    } catch (error) {}
+  };
+  const callGetListTask = async () => {
+    try {
+      const res = await SheetApi.getListData();
+      const newData = res.data
+        ? res.data.map((item: any) => ({
+            ...item,
+            createTask: item.id === "column-todo",
+            icon: item.id === "column-todo" ? <TodoIcon /> : <DoneIcon />,
+          }))
+        : initData;
+      setDataColumn(newData);
+    } catch (error) {}
+  };
   const onDragEnd = (result: DropResult) => {
     const { destination, source } = result;
     if (!destination) return null;
@@ -101,6 +95,7 @@ const DragDropContextComponent = () => {
     }
 
     if (source.droppableId === destination.droppableId) {
+      handleDragDropTask(result);
       const newColumn = reorderColumnList(result);
       if (newColumn) {
         setDataColumn(
@@ -111,6 +106,7 @@ const DragDropContextComponent = () => {
       }
       return null;
     }
+    handleDragDropTask(result);
     const newColumn: any = moveColumnList(result);
     if (newColumn && dataColumn) {
       setDataColumn(
@@ -119,47 +115,9 @@ const DragDropContextComponent = () => {
     }
     return null;
   };
-  const testCallApi = async (data: IRequestTask) => {
-    try {
-      await fetch("http://localhost:3000/api/sheet", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      testCallGetApi();
-      setIsCreateTask(false);
-    } catch (error) {}
-  };
-  const testCallGetApi = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/sheet", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await res.json();
-      const newData = data.data
-        ? data.data.map((item: any) => ({
-            ...item,
-            createTask:
-              item.column === "column-todo" || item.taskIds.length > 0
-                ? true
-                : false,
-            icon: item.column === "column-todo" ? <TodoIcon /> : <DoneIcon />,
-          }))
-        : initData;
-      setDataColumn(newData);
-    } catch (error) {}
-  };
 
   useEffect(() => {
-    testCallGetApi();
+    callGetListTask();
   }, []);
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -193,7 +151,7 @@ const DragDropContextComponent = () => {
               priority: values.priority,
               sortorder: values.sortorder,
             };
-            testCallApi(rawData as unknown as IRequestTask);
+            handleCreateTask(rawData as unknown as IRequestTask);
           }}
         />
       </S.CusTomModal>

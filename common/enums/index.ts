@@ -13,6 +13,17 @@ export enum EDueDate {
   Sat = "Sat",
   Sun = "Sun",
 }
+export enum EHeaderGGSheet {
+  idTask = "idTask",
+  nameTask = "Name Task",
+  assignee = "Assignee",
+  hasDue = "Has Due",
+  dateDue = "Date Due",
+  priority = "Priority",
+  sortOrder = "SortOrder",
+  column = "Column",
+  taskIndex = "Task Index",
+}
 
 export enum ESortOrder {
   Low = 1,
