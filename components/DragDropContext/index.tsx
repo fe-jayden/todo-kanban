@@ -34,7 +34,6 @@ const DragDropContextComponent = () => {
 
   const reorderColumnList = (result: DropResult) => {
     const { source, destination } = result;
-
     const column = dataColumn.find(({ id }) => id === source.droppableId);
     if (!column) return null;
 
@@ -46,6 +45,7 @@ const DragDropContextComponent = () => {
   };
   const moveColumnList = (result: DropResult) => {
     const { source, destination } = result;
+    console.log(result);
     const columnSource = dataColumn.find(({ id }) => id === source.droppableId);
     const [moved] = columnSource
       ? columnSource.taskIds.splice(source.index, 1)

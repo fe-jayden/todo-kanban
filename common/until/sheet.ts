@@ -1,6 +1,5 @@
 export function formatDataSheet(
     data: Record<string, any>[],
-    idColumn: "column-todo" | "column-done"
   ) {
     const headers = data[0];
   
@@ -17,5 +16,5 @@ export function formatDataSheet(
       formattedData.push(formattedRow);
     }
   
-    return formattedData.filter((item) => item.column === idColumn);
+    return formattedData
   }

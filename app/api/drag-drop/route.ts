@@ -9,7 +9,73 @@ const sheets: sheets_v4.Sheets = google.sheets({
   auth: authClientJwt,
 });
 const spreadsheetId = process.env.NEXT_PUBLIC_SPREADSHEET_ID;
+const reorderTaskId = async (
+  rows: any[],
+  result: {
+    source: { index: number; droppableId: string };
+    destination: { index: number; droppableId: string };
+  }
+) => {
+  const newRows = [...rows];
+  const rowToMove = newRows.splice(result.source.index, 1)[0];
+  newRows.splice(result.destination.index, 0, rowToMove);
 
+  const updateData = {
+    range: `sheet_todo`,
+    majorDimension: "ROWS",
+    values: newRows,
+  };
+
+  sheets.spreadsheets.values.update({
+    spreadsheetId: spreadsheetId,
+    range: updateData.range,
+    valueInputOption: "RAW",
+    resource: updateData,
+  });
+};
+const moveTaskId = async (result: {
+  source: { index: number; droppableId: string };
+  destination: { index: number; droppableId: string };
+}) => {
+  const range: Record<string, string> = {
+    "column-todo": "sheet_todo",
+    "column-done": "sheet_done",
+  };
+
+  const rowsSource = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: range[result.source.droppableId],
+  });
+
+  const rows = rowsSource.data.values || [];
+  const newRows = [...rows];
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: `${range[result.destination.droppableId]}!C2`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        newRows
+          .splice(result.source.index, 1)[0]
+          ?.filter((item: string) => item !== ""),
+      ],
+    },
+  });
+
+  // const updateData = {
+  //   range: range[result.source.droppableId],
+  //   majorDimension: "ROWS",
+  //   values: newRows?.splice(result.source.index, 1)[0],
+  // };
+
+  // await sheets.spreadsheets.values.update({
+  //   spreadsheetId: spreadsheetId,
+  //   range: updateData.range,
+  //   valueInputOption: "RAW",
+  //   resource: updateData,
+  // });
+};
 export async function POST(req: NextRequest) {
   const { source, destination } = await req.json();
   const newSource = { ...source, index: source.index + 1 };
@@ -22,64 +88,17 @@ export async function POST(req: NextRequest) {
 
   try {
     const rows = res.data.values || [];
-    const headerRow = rows?.[0];
-    const taskIndexCol = headerRow?.indexOf(EHeaderGGSheet.taskIndex);
-    const ColumnCol = headerRow?.indexOf(EHeaderGGSheet.column);
-
-    if (taskIndexCol === -1) {
-      return NextResponse.json(
-        { message: "ask Index column not found" },
-        { status: 400 }
-      );
-    }
-    let row1 = -1;
-    let row2 = -1;
-    for (let i = 1; i < rows.length; i++) {
-      if (rows[i][taskIndexCol] == newSource.index) {
-        row1 = i + 1;
-      }
-      if (rows[i][taskIndexCol] == newDestination.index) {
-        row2 = i + 1;
-      }
-      if (row1 !== -1 && row2 !== -1) break;
-    }
-
-    if (row1 === -1 || row2 === -1) {
-      return NextResponse.json(
-        { message: "One or both Task Index not found" },
-        { status: 400 }
-      );
-    }
-
-    const alphabetTaskIndex = String.fromCharCode(65 + taskIndexCol);
-
-    const row1ValuesTaskIndex = rows[row1 - 1].slice(taskIndexCol);
-    const row2ValuesTaskIndex = rows[row2 - 1].slice(taskIndexCol);
 
     if (source.droppableId === destination.droppableId) {
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: spreadsheetId,
-        range: `sheet_todo!${alphabetTaskIndex}${row1}`,
-        valueInputOption: "RAW",
-        requestBody: {
-          values: [row2ValuesTaskIndex],
-        },
-      });
-
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: spreadsheetId,
-        range: `sheet_todo!${alphabetTaskIndex}${row2}`,
-        valueInputOption: "RAW",
-        requestBody: {
-          values: [row1ValuesTaskIndex],
-        },
+      reorderTaskId(rows, {
+        source: newSource,
+        destination: newDestination,
       });
     } else {
-      const alphabetColumn = String.fromCharCode(65 + ColumnCol);
-      const row1ValuesColumn = rows[row1 - 1].slice(ColumnCol);
-      const row2ValuesColumn = rows[row2 - 1].slice(ColumnCol);
-      console.log(`sheet_todo!${alphabetColumn}${row1}`);
-      console.log(row1ValuesColumn);
+      moveTaskId({
+        source: newSource,
+        destination: newDestination,
+      });
     }
 
     return NextResponse.json(

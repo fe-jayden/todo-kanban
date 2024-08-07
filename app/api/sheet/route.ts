@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import { NextRequest, NextResponse } from "next/server";
 import { google, sheets_v4 } from "googleapis";
 import { formatDataSheet } from "@/common/until/sheet";
-import { sortBy } from "lodash";
 
 const spreadsheetId = process.env.NEXT_PUBLIC_SPREADSHEET_ID;
 const range = process.env.NEXT_PUBLIC_SHEET_RANGE;
@@ -17,14 +16,6 @@ export async function POST(req: NextRequest) {
   const { name_task, assignee, has_due, date_due, priority, sortorder } =
     await req.json();
   const taskId = uuidv4();
-
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: "sheet_todo",
-  });
-  const listTaskTodo =
-    res.data.values && formatDataSheet(res.data.values, "column-todo");
-  const taskIndex = Number(listTaskTodo?.length || 0) + 1;
   try {
     const rawData = [
       taskId,
@@ -34,8 +25,6 @@ export async function POST(req: NextRequest) {
       ...(date_due ? [date_due] : [null]),
       priority,
       sortorder,
-      "column-todo",
-      taskIndex,
     ];
     await sheets.spreadsheets.values.append({
       spreadsheetId,
@@ -59,27 +48,25 @@ export async function POST(req: NextRequest) {
 }
 export async function GET() {
   try {
-    const res = await sheets.spreadsheets.values.get({
+    const resTodo = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: "sheet_todo",
     });
-    if (res.data.values && res.data.values.length) {
+    const resDone = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "sheet_done",
+    });
+    if (resTodo.data.values && resDone.data.values) {
       const rawData = [
         {
           name: "To-Do",
           id: "column-todo",
-          taskIds: sortBy(
-            formatDataSheet(res.data.values, "column-todo"),
-            "task_index"
-          ),
+          taskIds: formatDataSheet(resTodo.data.values),
         },
         {
           name: "Done",
           id: "column-done",
-          taskIds: sortBy(
-            formatDataSheet(res.data.values, "column-done"),
-            "task_index"
-          ),
+          taskIds: formatDataSheet(resDone.data.values),
         },
       ];
       return Response.json({ data: rawData }, { status: 200 });
